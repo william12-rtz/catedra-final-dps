@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para la colección de eventos
+    match /events/{eventId} {
+      // Cualquiera puede leer eventos
+      allow read: if true;
+      
+      // Solo usuarios autenticados pueden crear eventos
+      allow create: if request.auth != null;
+      
+      // Solo el organizador puede actualizar o eliminar su evento
+      allow update, delete: if request.auth != null && 
+        resource.data.organizerId == request.auth.uid;
+    }
+    
+    // Reglas para notificaciones
+    match /notifications/{notificationId} {
+      // Solo puedes leer tus propias notificaciones
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // Permitir crear notificaciones (backend las crea)
+      allow create: if request.auth != null;
+      
+      // Solo puedes actualizar tus propias notificaciones
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // Solo puedes eliminar tus propias notificaciones
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Denegar acceso a cualquier otra colección por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

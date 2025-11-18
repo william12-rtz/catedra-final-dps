@@ -1,5 +1,5 @@
 // URL de tu backend
-export const API_URL = 'http://localhost:3000/api';
+export const API_URL = 'http://localhost:3000';
 
 // Facebook App ID (obtenerlo desde Facebook Developers)
 export const FACEBOOK_APP_ID = 'TU_FACEBOOK_APP_ID';

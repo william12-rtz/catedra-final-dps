@@ -18,4 +18,7 @@ const initializeFirebase = () => {
 
 initializeFirebase();
 
-module.exports = admin;
+// Obtener instancia de Firestore
+const db = admin.firestore();
+
+module.exports = { admin, db };

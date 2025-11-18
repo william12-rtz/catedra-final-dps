@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -15,8 +16,20 @@ const firebaseConfig = {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Inicializar Auth
+// Inicializar Auth con persistencia local
 const auth = getAuth(app);
 
-export { auth };
+// Configurar persistencia para que el usuario permanezca autenticado después de recargar
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log('Persistencia de autenticación configurada');
+  })
+  .catch((error) => {
+    console.error('Error al configurar persistencia:', error);
+  });
+
+// Inicializar Firestore
+const db = getFirestore(app);
+
+export { auth, db };
 export default app;
