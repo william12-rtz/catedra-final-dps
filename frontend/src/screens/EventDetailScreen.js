@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
@@ -36,14 +37,14 @@ export default function EventDetailScreen({ route, navigation }) {
   const loadEvent = async () => {
     try {
       const eventDoc = await getDoc(doc(db, 'events', eventId));
-      
+
       if (eventDoc.exists()) {
         const eventData = { id: eventDoc.id, ...eventDoc.data() };
         setEvent(eventData);
-        
+
         // Verificar si el usuario está asistiendo
         const isAttending = eventData.participants?.some(
-          p => p.userId === auth.currentUser?.uid
+            p => p.userId === auth.currentUser?.uid
         );
         setAttending(isAttending);
       } else {
@@ -58,13 +59,37 @@ export default function EventDetailScreen({ route, navigation }) {
     }
   };
 
+  const handleShareFacebook = async () => {
+    // 1. Construimos la URL del evento (puedes cambiarla por tu dominio real)
+
+    const eventUrl = `https://fe-events-murex.vercel.app` + eventId;
+
+    // 2. Construimos la URL de Facebook para compartir
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
+
+    try {
+      // 3. Verificamos si se puede abrir la URL
+      const supported = await Linking.canOpenURL(facebookUrl);
+      console.log(supported, 'LOG supported');
+
+      if (supported) {
+        await Linking.openURL(facebookUrl);
+      } else {
+        Alert.alert('Error', 'No se puede abrir Facebook');
+      }
+    } catch (error) {
+      console.log('Error al compartir en Facebook:', error);
+      Alert.alert('Error', 'Hubo un problema al compartir');
+    }
+  };
+
   const handleAttendance = async () => {
     try {
       const token = await auth.currentUser.getIdToken();
-      const endpoint = attending 
-        ? `${API_URL}/api/events/${eventId}/attend`
-        : `${API_URL}/api/events/${eventId}/attend`;
-      
+      const endpoint = attending
+          ? `${API_URL}/api/events/${eventId}/attend`
+          : `${API_URL}/api/events/${eventId}/attend`;
+
       const method = attending ? 'DELETE' : 'POST';
 
       const response = await fetch(endpoint, {
@@ -80,11 +105,11 @@ export default function EventDetailScreen({ route, navigation }) {
       if (response.ok) {
         setAttending(!attending);
         CustomAlert.alert(
-          '¡Listo!', 
-          attending 
-            ? 'Has cancelado tu asistencia' 
-            : 'Tu asistencia ha sido confirmada. Recibirás una notificación.',
-          () => loadEvent()
+            '¡Listo!',
+            attending
+                ? 'Has cancelado tu asistencia'
+                : 'Tu asistencia ha sido confirmada. Recibirás una notificación.',
+            () => loadEvent()
         );
       } else {
         CustomAlert.alert('Error', data.error || 'No se pudo actualizar tu asistencia');
@@ -101,37 +126,37 @@ export default function EventDetailScreen({ route, navigation }) {
 
   const handleDelete = async () => {
     CustomAlert.confirm(
-      'Eliminar evento',
-      '¿Estás seguro de que quieres eliminar este evento?',
-      async () => {
-        try {
-          const token = await auth.currentUser.getIdToken();
-          console.log('Eliminando evento:', eventId);
-          
-          const response = await fetch(`${API_URL}/api/events/${eventId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
+        'Eliminar evento',
+        '¿Estás seguro de que quieres eliminar este evento?',
+        async () => {
+          try {
+            const token = await auth.currentUser.getIdToken();
+            console.log('Eliminando evento:', eventId);
 
-          console.log('Response status:', response.status);
-          const data = await response.json();
-          console.log('Response data:', data);
-
-          if (response.ok) {
-            CustomAlert.alert('Eliminado', 'El evento ha sido eliminado', () => {
-              navigation.navigate('Events');
+            const response = await fetch(`${API_URL}/api/events/${eventId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
             });
-          } else {
-            CustomAlert.alert('Error', data.error || 'No se pudo eliminar el evento');
+
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (response.ok) {
+              CustomAlert.alert('Eliminado', 'El evento ha sido eliminado', () => {
+                navigation.navigate('Events');
+              });
+            } else {
+              CustomAlert.alert('Error', data.error || 'No se pudo eliminar el evento');
+            }
+          } catch (error) {
+            console.error('Error al eliminar evento:', error);
+            CustomAlert.alert('Error', 'No se pudo eliminar el evento: ' + error.message);
           }
-        } catch (error) {
-          console.error('Error al eliminar evento:', error);
-          CustomAlert.alert('Error', 'No se pudo eliminar el evento: ' + error.message);
         }
-      }
     );
   };
 
@@ -147,9 +172,9 @@ export default function EventDetailScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4285F4" />
-      </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4285F4" />
+        </View>
     );
   }
 
@@ -158,223 +183,223 @@ export default function EventDetailScreen({ route, navigation }) {
   }
 
   const isOrganizer = event.organizerId === auth.currentUser?.uid;
-  
+
   // Combinar fecha y hora para una comparación precisa en hora local
   const [year, month, day] = event.date.split('-');
   const [hours, minutes] = (event.time || '00:00').split(':');
   const eventDateTime = new Date(
-    parseInt(year), 
-    parseInt(month) - 1, 
-    parseInt(day), 
-    parseInt(hours), 
-    parseInt(minutes)
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes)
   );
   const now = new Date();
   const isPastEvent = eventDateTime < now;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>{event.title}</Text>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{event.category}</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        {/* Info Principal en Grid */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoCard}>
-            <MaterialIcons name="event" size={20} color="#4285F4" />
-            <Text style={styles.infoLabel}>Fecha</Text>
-            <Text style={styles.infoValue}>
-              {event.date.split('-').reverse().join('/')}
-            </Text>
-          </View>
-          
-          <View style={styles.infoCard}>
-            <MaterialIcons name="schedule" size={20} color="#4285F4" />
-            <Text style={styles.infoLabel}>Hora</Text>
-            <Text style={styles.infoValue}>{event.time}</Text>
-          </View>
-
-          <View style={styles.infoCard}>
-            <MaterialIcons name="group" size={20} color="#4285F4" />
-            <Text style={styles.infoLabel}>Asistentes</Text>
-            <Text style={styles.infoValue}>{event.participants?.length || 0}</Text>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>{event.title}</Text>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{event.category}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Ubicación y Descripción */}
-        <View style={styles.section}>
-          <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="place" size={18} color="#666" />
-            <Text style={styles.sectionTitle}>{event.location}</Text>
+        <View style={styles.content}>
+          {/* Info Principal en Grid */}
+          <View style={styles.infoGrid}>
+            <View style={styles.infoCard}>
+              <MaterialIcons name="event" size={20} color="#4285F4" />
+              <Text style={styles.infoLabel}>Fecha</Text>
+              <Text style={styles.infoValue}>
+                {event.date.split('-').reverse().join('/')}
+              </Text>
+            </View>
+
+            <View style={styles.infoCard}>
+              <MaterialIcons name="schedule" size={20} color="#4285F4" />
+              <Text style={styles.infoLabel}>Hora</Text>
+              <Text style={styles.infoValue}>{event.time}</Text>
+            </View>
+
+            <View style={styles.infoCard}>
+              <MaterialIcons name="group" size={20} color="#4285F4" />
+              <Text style={styles.infoLabel}>Asistentes</Text>
+              <Text style={styles.infoValue}>{event.participants?.length || 0}</Text>
+            </View>
+          </View>
+
+          {/* Ubicación y Descripción */}
+          <View style={styles.section}>
+            <View style={styles.sectionTitleRow}>
+              <MaterialIcons name="place" size={18} color="#666" />
+              <Text style={styles.sectionTitle}>{event.location}</Text>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.description}>{event.description}</Text>
+          </View>
+
+          {/* Organizador */}
+          <View style={styles.organizerRow}>
+            <MaterialIcons name="person" size={18} color="#666" />
+            <Text style={styles.organizerText}>Organizado por: {event.organizerEmail}</Text>
+          </View>
+
+          {/* Participantes */}
+          {event.participants && event.participants.length > 0 && (
+              <View style={styles.participantsSection}>
+                <Text style={styles.participantsTitle}>Participantes confirmados:</Text>
+                {event.participants.map((participant, index) => (
+                    <Text key={index} style={styles.participantEmail}>• {participant.userEmail}</Text>
+                ))}
+              </View>
+          )}
+
+          {/* Compartir Evento */}
+          <View style={styles.shareSection}>
+            <Text style={styles.shareSectionTitle}>Compartir evento</Text>
+            <View style={styles.shareButtons}>
+              <TouchableOpacity style={styles.shareButton} onPress={handleShareFacebook}>
+                <MaterialIcons name="facebook" size={24} color="#1877F2" />
+                <Text style={styles.shareButtonText}>Facebook</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shareButton}>
+                <MaterialIcons name="email" size={24} color="#EA4335" />
+                <Text style={styles.shareButtonText}>Email</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shareButton}>
+                <MaterialIcons name="link" size={24} color="#666" />
+                <Text style={styles.shareButtonText}>Copiar link</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Comentarios y Calificaciones */}
+          <View style={styles.commentsSection}>
+            <View style={styles.commentsSectionHeader}>
+              <MaterialIcons name="star" size={20} color="#FFC107" />
+              <Text style={styles.commentsSectionTitle}>Comentarios y Calificaciones</Text>
+            </View>
+
+            {/* Calificación promedio */}
+            <View style={styles.ratingOverview}>
+              <Text style={styles.ratingNumber}>4.5</Text>
+              <View style={styles.starsContainer}>
+                <MaterialIcons name="star" size={20} color="#FFC107" />
+                <MaterialIcons name="star" size={20} color="#FFC107" />
+                <MaterialIcons name="star" size={20} color="#FFC107" />
+                <MaterialIcons name="star" size={20} color="#FFC107" />
+                <MaterialIcons name="star-half" size={20} color="#FFC107" />
+              </View>
+              <Text style={styles.ratingCount}>12 calificaciones</Text>
+            </View>
+
+            {/* Lista de comentarios */}
+            <View style={styles.commentsList}>
+              <View style={styles.commentCard}>
+                <View style={styles.commentHeader}>
+                  <View style={styles.commentAvatar}>
+                    <Text style={styles.commentAvatarText}>JD</Text>
+                  </View>
+                  <View style={styles.commentInfo}>
+                    <Text style={styles.commentAuthor}>Juan Pérez</Text>
+                    <View style={styles.commentStars}>
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                    </View>
+                  </View>
+                </View>
+                <Text style={styles.commentText}>
+                  Excelente evento, muy bien organizado y con contenido de calidad.
+                </Text>
+                <Text style={styles.commentDate}>Hace 2 días</Text>
+              </View>
+
+              <View style={styles.commentCard}>
+                <View style={styles.commentHeader}>
+                  <View style={styles.commentAvatar}>
+                    <Text style={styles.commentAvatarText}>MG</Text>
+                  </View>
+                  <View style={styles.commentInfo}>
+                    <Text style={styles.commentAuthor}>María González</Text>
+                    <View style={styles.commentStars}>
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star" size={14} color="#FFC107" />
+                      <MaterialIcons name="star-outline" size={14} color="#FFC107" />
+                    </View>
+                  </View>
+                </View>
+                <Text style={styles.commentText}>
+                  Me gustó mucho, aunque el lugar estaba un poco lleno.
+                </Text>
+                <Text style={styles.commentDate}>Hace 1 semana</Text>
+              </View>
+            </View>
+
+            {/* Botón para agregar comentario */}
+            <TouchableOpacity style={styles.addCommentButton}>
+              <MaterialIcons name="add-comment" size={18} color="#4285F4" />
+              <Text style={styles.addCommentButtonText}>Agregar comentario</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.description}>{event.description}</Text>
-        </View>
+        {isOrganizer ? (
+            <View style={styles.actionsContainer}>
+              <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+                <MaterialIcons name="edit" size={16} color="#fff" />
+                <Text style={styles.editButtonText}>Editar</Text>
+              </TouchableOpacity>
 
-        {/* Organizador */}
-        <View style={styles.organizerRow}>
-          <MaterialIcons name="person" size={18} color="#666" />
-          <Text style={styles.organizerText}>Organizado por: {event.organizerEmail}</Text>
-        </View>
-
-        {/* Participantes */}
-        {event.participants && event.participants.length > 0 && (
-          <View style={styles.participantsSection}>
-            <Text style={styles.participantsTitle}>Participantes confirmados:</Text>
-            {event.participants.map((participant, index) => (
-              <Text key={index} style={styles.participantEmail}>• {participant.userEmail}</Text>
-            ))}
-          </View>
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                <MaterialIcons name="delete" size={16} color="#fff" />
+                <Text style={styles.deleteButtonText}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+        ) : (
+            !isPastEvent && (
+                <TouchableOpacity
+                    style={[styles.attendButton, attending && styles.attendingButton]}
+                    onPress={handleAttendance}
+                >
+                  <MaterialIcons name={attending ? "check-circle" : "add-circle"} size={18} color="#fff" />
+                  <Text style={styles.attendButtonText}>
+                    {attending ? 'Asistiendo' : 'Confirmar Asistencia'}
+                  </Text>
+                </TouchableOpacity>
+            )
         )}
 
-        {/* Compartir Evento */}
-        <View style={styles.shareSection}>
-          <Text style={styles.shareSectionTitle}>Compartir evento</Text>
-          <View style={styles.shareButtons}>
-            <TouchableOpacity style={styles.shareButton}>
-              <MaterialIcons name="facebook" size={24} color="#1877F2" />
-              <Text style={styles.shareButtonText}>Facebook</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.shareButton}>
-              <MaterialIcons name="email" size={24} color="#EA4335" />
-              <Text style={styles.shareButtonText}>Email</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.shareButton}>
-              <MaterialIcons name="link" size={24} color="#666" />
-              <Text style={styles.shareButtonText}>Copiar link</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Comentarios y Calificaciones */}
-        <View style={styles.commentsSection}>
-          <View style={styles.commentsSectionHeader}>
-            <MaterialIcons name="star" size={20} color="#FFC107" />
-            <Text style={styles.commentsSectionTitle}>Comentarios y Calificaciones</Text>
-          </View>
-          
-          {/* Calificación promedio */}
-          <View style={styles.ratingOverview}>
-            <Text style={styles.ratingNumber}>4.5</Text>
-            <View style={styles.starsContainer}>
-              <MaterialIcons name="star" size={20} color="#FFC107" />
-              <MaterialIcons name="star" size={20} color="#FFC107" />
-              <MaterialIcons name="star" size={20} color="#FFC107" />
-              <MaterialIcons name="star" size={20} color="#FFC107" />
-              <MaterialIcons name="star-half" size={20} color="#FFC107" />
+        {isPastEvent && (
+            <View style={styles.pastEventBanner}>
+              <MaterialIcons name="event-busy" size={20} color="#856404" />
+              <Text style={styles.pastEventText}>Evento finalizado</Text>
             </View>
-            <Text style={styles.ratingCount}>12 calificaciones</Text>
+        )}
+
+        <View style={styles.licenseSection}>
+          <View style={styles.licenseTitleRow}>
+            <MaterialIcons name="gavel" size={16} color="#333" />
+            <Text style={styles.licenseTitle}>Licencia</Text>
           </View>
-
-          {/* Lista de comentarios */}
-          <View style={styles.commentsList}>
-            <View style={styles.commentCard}>
-              <View style={styles.commentHeader}>
-                <View style={styles.commentAvatar}>
-                  <Text style={styles.commentAvatarText}>JD</Text>
-                </View>
-                <View style={styles.commentInfo}>
-                  <Text style={styles.commentAuthor}>Juan Pérez</Text>
-                  <View style={styles.commentStars}>
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                  </View>
-                </View>
-              </View>
-              <Text style={styles.commentText}>
-                Excelente evento, muy bien organizado y con contenido de calidad.
-              </Text>
-              <Text style={styles.commentDate}>Hace 2 días</Text>
-            </View>
-
-            <View style={styles.commentCard}>
-              <View style={styles.commentHeader}>
-                <View style={styles.commentAvatar}>
-                  <Text style={styles.commentAvatarText}>MG</Text>
-                </View>
-                <View style={styles.commentInfo}>
-                  <Text style={styles.commentAuthor}>María González</Text>
-                  <View style={styles.commentStars}>
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star" size={14} color="#FFC107" />
-                    <MaterialIcons name="star-outline" size={14} color="#FFC107" />
-                  </View>
-                </View>
-              </View>
-              <Text style={styles.commentText}>
-                Me gustó mucho, aunque el lugar estaba un poco lleno.
-              </Text>
-              <Text style={styles.commentDate}>Hace 1 semana</Text>
-            </View>
-          </View>
-
-          {/* Botón para agregar comentario */}
-          <TouchableOpacity style={styles.addCommentButton}>
-            <MaterialIcons name="add-comment" size={18} color="#4285F4" />
-            <Text style={styles.addCommentButtonText}>Agregar comentario</Text>
-          </TouchableOpacity>
+          <Text style={styles.licenseText}>
+            Este contenido está bajo licencia Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+          </Text>
+          <Text style={styles.licenseLink}>
+            https://creativecommons.org/licenses/by-sa/4.0/
+          </Text>
         </View>
-      </View>
-
-      {isOrganizer ? (
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-            <MaterialIcons name="edit" size={16} color="#fff" />
-            <Text style={styles.editButtonText}>Editar</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <MaterialIcons name="delete" size={16} color="#fff" />
-            <Text style={styles.deleteButtonText}>Eliminar</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        !isPastEvent && (
-          <TouchableOpacity
-            style={[styles.attendButton, attending && styles.attendingButton]}
-            onPress={handleAttendance}
-          >
-            <MaterialIcons name={attending ? "check-circle" : "add-circle"} size={18} color="#fff" />
-            <Text style={styles.attendButtonText}>
-              {attending ? 'Asistiendo' : 'Confirmar Asistencia'}
-            </Text>
-          </TouchableOpacity>
-        )
-      )}
-
-      {isPastEvent && (
-        <View style={styles.pastEventBanner}>
-          <MaterialIcons name="event-busy" size={20} color="#856404" />
-          <Text style={styles.pastEventText}>Evento finalizado</Text>
-        </View>
-      )}
-
-      <View style={styles.licenseSection}>
-        <View style={styles.licenseTitleRow}>
-          <MaterialIcons name="gavel" size={16} color="#333" />
-          <Text style={styles.licenseTitle}>Licencia</Text>
-        </View>
-        <Text style={styles.licenseText}>
-          Este contenido está bajo licencia Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
-        </Text>
-        <Text style={styles.licenseLink}>
-          https://creativecommons.org/licenses/by-sa/4.0/
-        </Text>
-      </View>
-    </ScrollView>
+      </ScrollView>
   );
 }
 
