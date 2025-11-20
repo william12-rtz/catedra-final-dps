@@ -62,7 +62,7 @@ export default function EventDetailScreen({ route, navigation }) {
   const handleShareFacebook = async () => {
     // 1. Construimos la URL del evento (puedes cambiarla por tu dominio real)
 
-    const eventUrl = `https://fe-events-murex.vercel.app` + eventId;
+    const eventUrl = `https://fe-events-murex.vercel.app/` + eventId;
 
     // 2. Construimos la URL de Facebook para compartir
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
@@ -82,6 +82,32 @@ export default function EventDetailScreen({ route, navigation }) {
       Alert.alert('Error', 'Hubo un problema al compartir');
     }
   };
+
+  const shareEmail = async () => {
+    if (!this.event) return;
+
+    const subject = encodeURIComponent(`Invitación a: ${event.title}`);
+
+    const body = encodeURIComponent(
+        `¡Hola!\n\n` +
+        `Te invito al siguiente evento:\n\n` +
+        `📅 Evento: ${event.title}\n` +
+        `📆 Fecha: ${event.date}\n` +
+        `🕐 Hora: ${event.time}\n` +
+        `📍 Lugar: ${event.location}\n` +
+        `🏷️ Categoría: ${event.category}\n\n` +
+        `Descripción:\n${event.description}\n\n` +
+        `👥 Asistentes confirmados: ${event.participants?.length || 0}\n\n` +
+        `Más información y detalles del evento:\n${"https://fe-events-murex.vercel.app/" + eventId}\n\n` +
+        `¡Nos vemos ahí! 🎉`
+    );
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+
+    // Abrir Gmail en nueva pestaña
+    window.open(gmailUrl, '_blank');
+
+  }
 
   const handleAttendance = async () => {
     try {
@@ -268,7 +294,7 @@ export default function EventDetailScreen({ route, navigation }) {
                 <MaterialIcons name="facebook" size={24} color="#1877F2" />
                 <Text style={styles.shareButtonText}>Facebook</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.shareButton}>
+              <TouchableOpacity style={styles.shareButton} onPress={shareEmail}>
                 <MaterialIcons name="email" size={24} color="#EA4335" />
                 <Text style={styles.shareButtonText}>Email</Text>
               </TouchableOpacity>
