@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
+  TextInput,
 } from "react-native";
 import {
   doc,
@@ -64,7 +65,7 @@ export default function EventDetailScreen({ route, navigation }) {
         );
 
         if (userComment) {
-          setComment(userComment.text);
+          setNewComment(userComment.text);
         }
       } else {
         Alert.alert("Error", "Evento no encontrado");
@@ -223,21 +224,26 @@ export default function EventDetailScreen({ route, navigation }) {
     );
   };
   const handleSaveComment = async () => {
-    // console.log("prueba de handleSaveComment ejecutado");
+    console.log("🔵 handleSaveComment ejecutado");
+    console.log("📝 newComment:", newComment);
+    console.log("⭐ userRating:", userRating);
 
     if (!newComment.trim()) {
-      console.log("Comentario vacío");
+      console.log("❌ Comentario vacío");
       return;
     }
 
     if (userRating === 0) {
+      console.log("❌ Rating en 0");
       Alert.alert("Error", "Selecciona una calificación antes de enviar");
       return;
     }
 
     try {
+      setSavingComment(true);
       const eventRef = doc(db, "events", eventId);
 
+      console.log("💾 Guardando comentario en Firebase...");
       await updateDoc(eventRef, {
         comments: arrayUnion({
           userId: auth.currentUser.uid,
@@ -248,17 +254,20 @@ export default function EventDetailScreen({ route, navigation }) {
         }),
       });
 
-      // console.log("pruebas depuraciones: Comentario + calificación guardado en Firebase");
+      console.log("✅ Comentario guardado en Firebase");
 
       // Limpiar inputs
       setNewComment("");
       setUserRating(0);
       setShowCommentBox(false);
+      setSavingComment(false);
 
       // Recargar evento
       await loadEvent();
     } catch (e) {
-      console.log("ERROR guardando comentario:", e);
+      console.log("❌ ERROR guardando comentario:", e);
+      setSavingComment(false);
+      Alert.alert("Error", "No se pudo guardar el comentario: " + e.message);
     }
   };
   const formatDate = (dateString) => {

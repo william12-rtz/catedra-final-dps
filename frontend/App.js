@@ -181,11 +181,6 @@ export default function App() {
             component={DashboardScreen}
             options={{ title: "Dashboard" }}
           />
-          <Stack.Screen
-            name="AddComentario"
-            component={AddComentarioScreen}
-            options={{ title: "Agregar Comentario" }}
-          />
         </Stack.Navigator>
       </NavigationContainer>
     </AlertProvider>
