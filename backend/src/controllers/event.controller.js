@@ -21,6 +21,7 @@ const createEvent = async (req, res) => {
       organizerId: userId,
       organizerEmail: req.user.email,
       participants: [],
+      comments: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: 'active'
