@@ -11,8 +11,8 @@ https://github.com/FrankMen06/fe.events.git
 ## flujo de trabajo en Youtrack
 https://catedradps.youtrack.cloud/agiles/195-0/current
 
-USUARIO: ProfesorDPS
-PASSWORD: 1234
+-USUARIO: ProfesorDPS
+-PASSWORD: 1234
 
 ## Link de mockups
 
