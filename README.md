@@ -1,28 +1,24 @@
-LINKS
+# LINKS
 
-Repositorios del proyecto 
+## Repositorios del proyecto 
 
-Repo principal
+- Repo principal
 https://github.com/william12-rtz/catedra-final-dps
 
-Repositorio externo para compartir por red social
+- Repositorio externo para compartir por red social
 https://github.com/FrankMen06/fe.events.git
 
-Trello y figma son de paga y aja no pudimos pero usamos otra alternativa, el cual se llama You track, entonces le hemos creado una cuenta para que pueda visualizar  nuestros tickets del flujo de trabajo
+## flujo de trabajo en Youtrack
 https://catedradps.youtrack.cloud/agiles/195-0/current
 
-ProfesorDPS
-1234
+USUARIO: ProfesorDPS
+PASSWORD: 1234
 
-Link de mockups
+## Link de mockups
 
-https://www.canva.com/design/DAG5iRlwSCM/8s2DneO282MBdyUDfXPzFA/edit?utm_content=DAG5iRlwSCM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+https://www.canva.com/design/DAG5iRlwSCM/8s2DneO282MBdyUDfXPzFA/edit?utm_content=DAG5iRlwSCM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton 
 
-
-El tipo de licencia que utilizamos fue:  Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
-
-
-
+------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Aplicación Cátedra Final DPS
 
