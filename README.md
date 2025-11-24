@@ -1,8 +1,34 @@
-# 🎉 Aplicación Cátedra Final DPS
+LINKS
+
+Repositorios del proyecto 
+
+Repo principal
+https://github.com/william12-rtz/catedra-final-dps
+
+Repositorio externo para compartir por red social
+https://github.com/FrankMen06/fe.events.git
+
+Trello y figma son de paga y aja no pudimos pero usamos otra alternativa, el cual se llama You track, entonces le hemos creado una cuenta para que pueda visualizar  nuestros tickets del flujo de trabajo
+https://catedradps.youtrack.cloud/agiles/195-0/current
+
+ProfesorDPS
+1234
+
+Link de mockups
+
+https://www.canva.com/design/DAG5iRlwSCM/8s2DneO282MBdyUDfXPzFA/edit?utm_content=DAG5iRlwSCM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+
+El tipo de licencia que utilizamos fue:  Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+
+
+
+
+# Aplicación Cátedra Final DPS
 
 Aplicación completa de gestión de eventos con autenticación de Firebase, sistema de notificaciones en tiempo real, comentarios y estadísticas. Backend con Node.js y frontend con React Native/Expo.
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 Catedrafinal_dps/
@@ -25,7 +51,7 @@ Catedrafinal_dps/
     └── package.json
 ```
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 ### 🔐 Autenticación
 - Registro y login con email y contraseña
@@ -84,9 +110,9 @@ Catedrafinal_dps/
 - Atribución visible en detalles de eventos
 - Documentación completa de la licencia
 
-## 🚀 Instalación y Configuración
+## Instalación y Configuración
 
-### 📋 Pasos para Clonar e Instalar
+### Pasos para Clonar e Instalar
 
 ### 1️ Clonar el Repositorio
 
@@ -106,10 +132,9 @@ npm install
 ```powershell
 npm start
 ```
+El servidor estará corriendo en: `http://localhost:3000`
 
-✅ El servidor estará corriendo en: `http://localhost:3000`
-
-### 4️⃣ Configurar Frontend
+### Configurar Frontend
 
 ```powershell
 cd frontend
@@ -126,15 +151,5 @@ Luego en la consola presiona:
 - `a` para Android (requiere emulador o Expo Go)
 - `i` para iOS (requiere Mac con Xcode)
 
-✅ La aplicación web estará en: `http://localhost:8081`
+La aplicación web estará en: `http://localhost:8081`
 
-## 📄 Licencia del Contenido
-
-Todo el contenido generado en la aplicación está bajo licencia:
-**Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**
-
-Más información: https://creativecommons.org/licenses/by-sa/4.0/
-
-## 📄 Licencia del Código
-
-ISC
